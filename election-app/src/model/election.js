@@ -16,8 +16,8 @@ const ElectionMapper = sequelize.define('elections', {
 });
 
 // 候选人
-const CondidateMapper = sequelize.define('condidates', {
-  condidate_id: {
+const CandidateMapper = sequelize.define('candidates', {
+  candidate_id: {
     type: DataTypes.INTEGER.UNSIGNED,
     autoIncrement: true,
     primaryKey: true,
@@ -46,6 +46,6 @@ const VotesMapper = sequelize.define('votes', {
 
 module.exports = {
   ElectionMapper,
-  CondidateMapper,
+  CandidateMapper,
   VotesMapper,
 };

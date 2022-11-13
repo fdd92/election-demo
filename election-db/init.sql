@@ -1,8 +1,9 @@
 CREATE TABLE admins (
     admin_id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '管理员ID',
     account VARCHAR(64) NOT NULL COMMENT '账号',
-    pass CHAR(32) NOT NULL COMMENT '密码',
+    pass CHAR(64) NOT NULL COMMENT '密码',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    salt CHAR(10) NOT NULL,
     PRIMARY KEY (`admin_id`),
     UNIQUE INDEX (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT '管理员账号表';
@@ -12,7 +13,8 @@ CREATE TABLE candidates (
     election_id INT UNSIGNED NOT NULL COMMENT '选举ID',
     `name` VARCHAR(16) COMMENT '候选人姓名',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    PRIMARY KEY (`candidate_id`)
+    PRIMARY KEY (`candidate_id`),
+    KEY(`election_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT '候选人表';
 
 CREATE TABLE elections (

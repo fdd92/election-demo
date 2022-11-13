@@ -9,7 +9,8 @@ const AdminMapper = sequelize.define('admins', {
     primaryKey: true,
   },
   account: DataTypes.STRING(64),
-  pass: DataTypes.CHAR(32),
+  pass: DataTypes.CHAR(64),
+  salt: DataTypes.CHAR(10),
   created_at: DataTypes.TIME,
 }, {
   timestamps: false,
