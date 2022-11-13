@@ -14,4 +14,7 @@ router.post('/elections', isAuth, admin.createElector);
 /* POST 添加候选人 */
 router.post('/elections/:electionId/candidates', isAuth, admin.addCandidate);
 
+/* PUT 更新选举状态 */
+router.put('/elections/:electionId', isAuth, admin.updateElection);
+
 module.exports = router;

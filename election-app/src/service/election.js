@@ -8,13 +8,22 @@ const create = async () => {
   return election;
 };
 
+// 获取选举
+async function getElection(electionId) {
+  // todo: for update
+  const election = await ElectionMapper.findByPk(electionId);
+  // 查询选举是否存在
+  if (election == null) {
+    throw new Error(`找不到选举 ${electionId}。`);
+  }
+  return election;
+}
+
 // 添加候选人
 const addCandidate = async (electionId, candidate) => {
   // 查询选举是否存在
-  const election = await ElectionMapper.findByPk(electionId);
-  if (election == null) {
-    throw new Error(`找不到选举 ${electionId}。`);
-  } else if (election.stat !== 1) {
+  const election = await getElection(electionId);
+  if (election.get('stat') !== 1) {
     throw new Error(`选举 ${electionId} 不是初始化状态`);
   }
 
@@ -40,11 +49,8 @@ const addCandidate = async (electionId, candidate) => {
 
 // 结束选举
 const end = async (electionId) => {
-  // 查询选举是否存在
-  const election = await ElectionMapper.findByPk(electionId);
-  if (election == null) {
-    throw new Error(`找不到选举 ${electionId}。`);
-  } else if (election.stat !== 2) {
+  const election = await getElection(electionId);
+  if (election.get('stat') !== 2) {
     throw new Error(`选举 ${electionId} 不在进行中状态`);
   }
 
@@ -54,11 +60,8 @@ const end = async (electionId) => {
 
 // 开始选举
 const start = async (electionId) => {
-  // 查询选举是否存在
-  const election = await ElectionMapper.findByPk(electionId);
-  if (election == null) {
-    throw new Error(`找不到选举 ${electionId}。`);
-  } else if (election.stat !== 1) {
+  const election = await getElection(electionId);
+  if (election.get('stat') !== 1) {
     throw new Error(`选举 ${electionId} 不是初始化状态。`);
   }
 
@@ -75,6 +78,7 @@ const start = async (electionId) => {
 
   election.set('stat', 2);
   await election.save();
+  return election;
 };
 
 module.exports = {
