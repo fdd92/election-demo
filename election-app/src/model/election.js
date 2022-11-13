@@ -30,7 +30,7 @@ const CandidateMapper = sequelize.define('candidates', {
 });
 
 // 选票
-const VotesMapper = sequelize.define('votes', {
+const VoteMapper = sequelize.define('votes', {
   vote_id: {
     type: DataTypes.BIGINT.UNSIGNED,
     autoIncrement: true,
@@ -38,7 +38,7 @@ const VotesMapper = sequelize.define('votes', {
   },
   elector_id: DataTypes.CHAR(10),
   elector_email: DataTypes.STRING(64),
-  condidate_id: DataTypes.INTEGER,
+  candidate_id: DataTypes.INTEGER,
   created_at: DataTypes.TIME,
 }, {
   timestamps: false,
@@ -47,5 +47,5 @@ const VotesMapper = sequelize.define('votes', {
 module.exports = {
   ElectionMapper,
   CandidateMapper,
-  VotesMapper,
+  VoteMapper,
 };

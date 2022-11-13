@@ -1,4 +1,5 @@
-const { ElectionMapper, CandidateMapper } = require('../model/election');
+const { ElectionMapper, CandidateMapper, VoteMapper } = require('../model/election');
+const electionRepository = require('../repository/election');
 
 // 创建选举
 const create = async () => {
@@ -81,9 +82,46 @@ const start = async (electionId) => {
   return election;
 };
 
+// 校验
+const validElector = async (electionId, electorId) => {
+  // 校验选举状态
+  const election = await getElection(electionId);
+  if (election.get('stat') !== 2) {
+    throw new Error(`选举 ${election} 不在投票中。`);
+  }
+
+  // 判断是否参与过选举
+  const count = electionRepository.countVote(electionId, electorId);
+  if (count) {
+    throw new Error('您已经参与过这场选举了。');
+  }
+};
+
+// 投票
+const voting = async (electionId, electorId, candidateId, email) => {
+  // 先校验权限
+  await validElector(electionId, electorId);
+
+  // 投票
+  const count = await electionRepository.electionHasCandidate(electionId, candidateId);
+
+  if (!count) {
+    throw new Error('参选人不在这场选举中。');
+  }
+
+  const vote = await VoteMapper.create({
+    candidate_id: candidateId,
+    elector_email: email,
+    elector_id: electorId,
+  });
+  return vote;
+};
+
 module.exports = {
   start,
   create,
   end,
   addCandidate,
+  validElector,
+  voting,
 };

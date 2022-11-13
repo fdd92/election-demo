@@ -31,5 +31,7 @@ CREATE TABLE votes (
     elector_email VARCHAR(64) NOT NULL COMMENT '选民电子邮箱',
     candidate_id INT UNSIGNED NOT NULL COMMENT '候选人ID',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    PRIMARY KEY (`vote_id`)
+    PRIMARY KEY (`vote_id`),
+    INDEX (`elector_id`),
+    INDEX (`candidate_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT '选票表';
