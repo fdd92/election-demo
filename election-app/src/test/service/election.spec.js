@@ -107,7 +107,6 @@ describe('开启与结束选举', () => {
 
 describe('查询选举详情', () => {
   it('查询选举详情', async () => {
-    const electionDetail = await electionService.queryElectionDetail(151);
-    console.log(JSON.stringify(electionDetail));
+    await expect(electionService.queryElectionDetail(151)).resolves.not.toThrow();
   });
 });

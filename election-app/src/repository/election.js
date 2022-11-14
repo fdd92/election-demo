@@ -32,4 +32,16 @@ const queryVoteDetailByElectionId = async (electionId) => {
   return results;
 };
 
-module.exports = { countVote, electionHasCandidate, queryVoteDetailByElectionId };
+// 遍历选票
+const getVotes = async (lastId, electionId, limit) => {
+  const cursor = lastId || 0;
+  const results = await sequelize.query('SELECT vote_id,elector_email FROM votes JOIN candidates USING(candidate_id) WHERE election_id = ? AND vote_id > ? LIMIT ?', {
+    replacements: [electionId, cursor, limit],
+    type: QueryTypes.SELECT,
+  });
+  return results;
+};
+
+module.exports = {
+  countVote, electionHasCandidate, queryVoteDetailByElectionId, getVotes,
+};

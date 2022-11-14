@@ -18,7 +18,7 @@ async function getElection(electionId, raw = false) {
   }
 
   // todo: for update
-  const election = await ElectionMapper.findByPk(electionId);
+  const election = await ElectionMapper.findByPk(electionId, options);
   // 查询选举是否存在
   if (election == null) {
     throw new Error(`找不到选举 ${electionId}。`);
@@ -125,7 +125,7 @@ const voting = async (electionId, electorId, candidateId, email) => {
 
 // 选举详情
 const queryElectionDetail = async (electionId) => {
-  const election = getElection(electionId, true);
+  const election = await getElection(electionId, true);
 
   const voteDetail = await electionRepository.queryVoteDetailByElectionId(electionId);
 

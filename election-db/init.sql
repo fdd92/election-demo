@@ -8,6 +8,9 @@ CREATE TABLE admins (
     UNIQUE INDEX (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT '管理员账号表';
 
+/* 初始账号 */
+insert into `admins` (`admin_id`, `account`, `pass`, `salt`) values('1','admin','9f9501e5389fafea17dded15df6c079b158272f497109ae5a38236ed3d609ec6','MB55W68VIY');
+
 CREATE TABLE candidates (
     candidate_id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '候选人ID',
     election_id INT UNSIGNED NOT NULL COMMENT '选举ID',

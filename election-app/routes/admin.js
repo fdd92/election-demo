@@ -2,6 +2,8 @@ const express = require('express');
 const { celebrate, Joi, Segments } = require('celebrate');
 const admin = require('../src/controller/admin');
 const isAuth = require('../src/middlewares/isAuth');
+const { eventEmitter } = require('../src/event');
+const { client } = require('../src/cache');
 
 const router = express.Router();
 
@@ -43,5 +45,17 @@ router.get('/candidates/:candidateId', isAuth, celebrate({
     candidateId: Joi.number().min(1).integer().required(),
   }),
 }), admin.queryCandidateDetail);
+
+router.get('/test', async (req, res) => {
+  eventEmitter.emit('election-end', {
+    electionId: 151,
+  });
+  res.json({ message: 'success' });
+});
+
+router.get('/test1', async (req, res) => {
+  await client.set('a', 1);
+  res.json({ message: 'success' });
+});
 
 module.exports = router;
