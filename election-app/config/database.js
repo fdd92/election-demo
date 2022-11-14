@@ -1,8 +1,8 @@
 module.exports = {
   // MySQL 配置信息
-  database: 'election', // 数据库
-  username: 'root', // 用户名
-  password: 'develop', // 密码
-  host: 'localhost', // 服务器
-  port: 3306, // 端口号
+  database: process.env.MYSQL_DATABASE, // 数据库
+  username: process.env.MYSQL_USERNAME, // 用户名
+  password: process.env.MYSQL_PASSWORD, // 密码
+  host: process.env.MYSQL_HOST, // 服务器
+  port: process.env.MYSQL_PORT, // 端口号
 };

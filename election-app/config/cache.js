@@ -1,5 +1,5 @@
 module.exports = {
   // Redis 配置信息
-  port: 6379, // 端口
-  host: '127.0.0.1', // 主机
+  port: process.env.REDIS_PORT || 6379, // 端口
+  host: process.env.REDIS_HOST || '127.0.0.1', // 主机
 };

@@ -7,27 +7,36 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=develop
       - MYSQL_DATABASE=election
-    ports:
-      - 3306:3306
   cache:
     image: redis:7.0
-    ports:
-      - 6379:6379
     command: redis-server --save 20 1 --loglevel warning
     volumes:
       - cache:/data
   app:
-    image: node:12-alpine
-    ports: 3000:3000
-    command: sh -c "npm i && npm run dev"
+    image: node:18-alpine
+    ports: 
+      - 3000:3000
+    command: sh -c "npm config set registry https://registry.npm.taobao.org/ &&npm i && npm run dev"
     working_dir: /app
-    volumes: ./election-app:/app
+    volumes: 
+      - ./election-app:/app
     depends_on:
       - db
       - cache
     environment:
-      REDIS_HOST: cache
-      REDIS_PORT: 6379
+      - JWT_SECRET=8a2da05455775e8987cbfac5a0ca54f3f728e274
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - MYSQL_DATABASE=election
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=develop
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MAIL_HOST=smtp.qq.com
+      - MAIL_PORT=465
+      - MAIL_USER=fdd92@qq.com
+      - MAIL_SEND_MAIL=fdd92@qq.com
+      - MAIL_PASSWORD=xxx
 
 volumes:
   db:
