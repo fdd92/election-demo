@@ -89,7 +89,7 @@ const validElector = async (electionId, electorId) => {
   // 校验选举状态
   const election = await electionRepository.getElection(electionId);
   if (election.get('stat') !== 2) {
-    throw new BussErr(`选举 ${election} 不在投票中。`);
+    throw new BussErr(`选举 ${election.get('election_id')} 不在投票中。`);
   }
 
   // 判断是否参与过选举
