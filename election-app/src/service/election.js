@@ -13,9 +13,9 @@ const create = async () => {
 
 // 添加候选人
 const addCandidate = async (electionId, candidate) => {
-  // 查询选举是否存在
-  const condidateModel = await sequelize.transaction(async (t) => {
-    const election = await electionRepository.getElection(electionId);
+  const condidateModel = await sequelize.transaction(async () => {
+    // 查询选举是否存在
+    const election = await electionRepository.getElection(electionId, false, true);
     if (election.get('stat') !== 1) {
       throw new BussErr(`选举 ${electionId} 不是初始化状态`);
     }
@@ -45,36 +45,43 @@ const addCandidate = async (electionId, candidate) => {
 
 // 结束选举
 const end = async (electionId) => {
-  const election = await electionRepository.getElection(electionId);
-  if (election.get('stat') !== 2) {
-    throw new BussErr(`选举 ${electionId} 不在进行中状态`);
-  }
+  const electionModel = await sequelize.transaction(async () => {
+    const election = await electionRepository.getElection(electionId, false, true);
+    if (election.get('stat') !== 2) {
+      throw new BussErr(`选举 ${electionId} 不在进行中状态`);
+    }
 
-  election.stat = 3;
-  await election.save();
+    election.stat = 3;
+    await election.save();
+    return election;
+  });
+  return electionModel;
 };
 
 // 开始选举
 const start = async (electionId) => {
-  const election = await electionRepository.getElection(electionId);
-  if (election.get('stat') !== 1) {
-    throw new BussErr(`选举 ${electionId} 不是初始化状态。`);
-  }
+  const electionModel = await sequelize.transaction(async () => {
+    const election = await electionRepository.getElection(electionId, false, true);
+    if (election.get('stat') !== 1) {
+      throw new BussErr(`选举 ${electionId} 不是初始化状态。`);
+    }
 
-  // 查询选举人数
-  const count = await CandidateMapper.count({
-    where: {
-      election_id: electionId,
-    },
+    // 查询选举人数
+    const count = await CandidateMapper.count({
+      where: {
+        election_id: electionId,
+      },
+    });
+
+    if (count < 2) {
+      throw new BussErr(`选举 ${electionId} 需要 2 个人以上才能开始。`);
+    }
+
+    election.set('stat', 2);
+    await election.save();
+    return election;
   });
-
-  if (count < 2) {
-    throw new BussErr(`选举 ${electionId} 需要 2 个人以上才能开始。`);
-  }
-
-  election.set('stat', 2);
-  await election.save();
-  return election;
+  return electionModel;
 };
 
 // 校验
@@ -95,24 +102,27 @@ const validElector = async (electionId, electorId) => {
 
 // 投票
 const voting = async (electionId, electorId, candidateId, email) => {
-  // 先校验权限
-  await validElector(electionId, electorId);
+  const voteDetail = await sequelize.transaction(async () => {
+    // 先校验权限
+    await validElector(electionId, electorId);
 
-  // 投票
-  const count = await electionRepository.electionHasCandidate(electionId, candidateId);
+    // 投票
+    const count = await electionRepository.electionHasCandidate(electionId, candidateId);
 
-  if (!count) {
-    throw new BussErr('参选人不在这场选举中。');
-  }
+    if (!count) {
+      throw new BussErr('参选人不在这场选举中。');
+    }
 
-  await VoteMapper.create({
-    candidate_id: candidateId,
-    elector_email: email,
-    elector_id: electorId,
+    await VoteMapper.create({
+      candidate_id: candidateId,
+      elector_email: email,
+      elector_id: electorId,
+    });
+
+    const detail = await electionRepository.queryVoteDetailByElectionId(electionId);
+    return detail;
   });
-
-  const detail = await electionRepository.queryVoteDetailByElectionId(electionId);
-  return detail;
+  return voteDetail;
 };
 
 // 选举详情

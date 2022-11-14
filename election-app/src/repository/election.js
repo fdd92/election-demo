@@ -45,19 +45,16 @@ const getVotes = async (lastId, electionId, limit) => {
 };
 
 // 获取选举
-async function getElection(electionId, raw = false, tx = null, lock = false) {
+async function getElection(electionId, raw = false, lock = false) {
   const options = {};
   if (raw) {
     options.raw = true;
     options.nest = true;
   }
 
-  if (tx) {
-    options.transaction = tx;
-    if (lock) {
-      // 添加行级锁，防止并发
-      options.lock = true;
-    }
+  if (lock) {
+    // 添加行级锁，防止并发
+    options.lock = true;
   }
 
   const election = await ElectionMapper.findByPk(electionId, options);
