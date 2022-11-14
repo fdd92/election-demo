@@ -2,6 +2,8 @@ const express = require('express');
 const { celebrate, Joi, Segments } = require('celebrate');
 const admin = require('../src/controller/admin');
 const isAuth = require('../src/middlewares/isAuth');
+const { eventEmitter } = require('../src/event');
+const { client } = require('../src/cache');
 
 const router = express.Router();
 

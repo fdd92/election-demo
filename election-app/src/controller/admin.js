@@ -1,6 +1,7 @@
 const console = require('console');
 const adminService = require('../service/admin');
 const electionService = require('../service/election');
+const { eventEmitter } = require('../event');
 
 // 管理员登录
 const login = async (req, res) => {
@@ -41,9 +42,14 @@ const updateElection = async (req, res) => {
   // 操作分流
   let election;
   if (action === 1) {
+    // 开始选举
     election = await electionService.start(electionId);
   } else if (action === 2) {
+    // 结束选举
     election = await electionService.end(electionId);
+    eventEmitter.emit('election-end', {
+      electionId: election.get('election_id'),
+    });
   } else {
     throw new Error('错误的操作');
   }

@@ -3,32 +3,19 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const { isCelebrateError } = require('celebrate');
-
-const events = require('events');
-
-const eventEmitter = new events.EventEmitter();
+const { eventEmitter } = require('./src/event');
+const { sendElectionResult } = require('./src/job/notice');
 
 const adminRouter = require('./routes/admin');
 const electorRouter = require('./routes/elector');
 
 const app = express();
 
-app.set('eventEmitter', eventEmitter);
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// error handling
-app.use((err, req, res, next) => {
-  if (err.name === 'UnauthorizedError') {
-    res.status(401).json({ msg: 'token 校验失败' });
-  } else {
-    next(err);
-  }
-});
 
 // celebrate error handling
 const celebrateErrorHandling = (err, req, res, next) => {
@@ -52,5 +39,17 @@ const celebrateErrorHandling = (err, req, res, next) => {
 app.use('/', adminRouter);
 app.use('/elector', electorRouter);
 app.use(celebrateErrorHandling);
+
+// error handling
+app.use((err, req, res) => {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).json({ msg: 'token 校验失败' });
+  } else {
+    res.status(500).json({ msg: '服务器错误。' });
+  }
+});
+
+// 配置事件回调
+eventEmitter.on('election-end', sendElectionResult);
 
 module.exports = app;
