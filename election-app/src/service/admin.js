@@ -18,12 +18,12 @@ const login = async (account, password) => {
   });
 
   if (admin == null) {
-    throw new BussErr('账号或密码错误。');
+    throw new BussErr('账号或密码错误。', 401);
   }
 
   const validPassword = crypto.createHash('sha256').update(password + admin.salt).digest('hex');
   if (validPassword !== admin.pass) {
-    throw new BussErr('账号或密码错误。');
+    throw new BussErr('账号或密码错误。', 400);
   }
 
   return generateToken(admin.account);

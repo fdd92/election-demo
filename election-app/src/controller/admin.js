@@ -14,7 +14,6 @@ const login = async (req, res) => {
     token,
   });
 };
-// 管理员查询选举
 
 // 创建选举
 const createElector = async (req, res) => {
@@ -30,7 +29,7 @@ const addCandidate = async (req, res) => {
   const condidate = await electionService.addCandidate(electionId, {
     name: req.body.name,
   });
-  res.status('201').json({
+  res.status('200').json({
     condidate,
   });
 };
@@ -74,7 +73,7 @@ const electionDetail = async (req, res) => {
 // 候选人选票详情
 const queryCandidateDetail = async (req, res) => {
   const { candidateId } = req.params;
-  const { page } = req.body;
+  const { page } = req.query;
 
   // 查询
   const detail = await electionService.queryCandidateDetail(candidateId, page);

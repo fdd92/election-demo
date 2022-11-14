@@ -2,9 +2,9 @@ const electionService = require('../service/election');
 
 // 校验投票人信息
 const validElector = async (req, res) => {
-  const { election_id: electionId, elector_id: electorId } = req.body;
+  const { electionId, electorId } = req.body;
 
-  electionService.validElector(electionId, electorId);
+  await electionService.validElector(electionId, electorId);
 
   res.status('200').json({});
 };
@@ -12,12 +12,12 @@ const validElector = async (req, res) => {
 // 投票
 const voting = async (req, res) => {
   const {
-    election_id: electionId, elector_id: electorId, email, candidate_id: candidateId,
+    electionId, electorId, email, candidateId,
   } = req.body;
 
-  electionService.voting(electionId, electorId, candidateId, email);
+  const detail = await electionService.voting(electionId, electorId, candidateId, email);
 
-  res.status('200').json({});
+  res.status('200').json({ detail });
 };
 
 module.exports = { validElector, voting };

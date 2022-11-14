@@ -19,7 +19,14 @@ router.post('/admin/login', celebrate({
 router.post('/elections', isAuth, asyncHandler(admin.createElector));
 
 /* PUT 更新选举状态 */
-router.put('/elections/:electionId', isAuth, asyncHandler(admin.updateElection));
+router.put('/elections/:electionId', isAuth, celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    electionId: Joi.number().min(1).integer().required(),
+  }),
+  [Segments.BODY]: Joi.object().keys({
+    action: Joi.number().integer().required(),
+  }),
+}), asyncHandler(admin.updateElection));
 
 /* GET 查看候选详情 */
 router.get('/elections/:electionId', isAuth, celebrate({
@@ -32,12 +39,13 @@ router.get('/elections/:electionId', isAuth, celebrate({
 router.post('/candidates', isAuth, celebrate({
   [Segments.BODY]: Joi.object().keys({
     electionId: Joi.number().min(1).integer().required(),
+    name: Joi.string().required(),
   }),
 }), asyncHandler(admin.addCandidate));
 
 /* POST 查看候选人选票明细 */
 router.get('/candidates/:candidateId', isAuth, celebrate({
-  [Segments.BODY]: Joi.object().keys({
+  [Segments.QUERY]: Joi.object().keys({
     page: Joi.number().min(1).integer().required(),
   }),
   [Segments.PARAMS]: Joi.object().keys({

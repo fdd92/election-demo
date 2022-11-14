@@ -86,7 +86,8 @@ const validElector = async (electionId, electorId) => {
   }
 
   // 判断是否参与过选举
-  const count = electionRepository.countVote(electionId, electorId);
+  const count = await electionRepository.countVote(electionId, electorId);
+
   if (count) {
     throw new BussErr('您已经参与过这场选举了。');
   }
@@ -104,12 +105,14 @@ const voting = async (electionId, electorId, candidateId, email) => {
     throw new BussErr('参选人不在这场选举中。');
   }
 
-  const vote = await VoteMapper.create({
+  await VoteMapper.create({
     candidate_id: candidateId,
     elector_email: email,
     elector_id: electorId,
   });
-  return vote;
+
+  const detail = await electionRepository.queryVoteDetailByElectionId(electionId);
+  return detail;
 };
 
 // 选举详情
@@ -125,12 +128,12 @@ const queryElectionDetail = async (electionId) => {
 };
 
 // 选举人详情
-const queryCandidateDetail = async (condidateId, page) => {
+const queryCandidateDetail = async (candidateId, page) => {
   const pageSize = 10;
   const offset = (page - 1) * pageSize;
   const votesResult = await VoteMapper.findAndCountAll({
     where: {
-      condidate_id: condidateId,
+      candidate_id: candidateId,
     },
     limit: pageSize,
     offset,
