@@ -1,6 +1,7 @@
 const express = require('express');
 const { celebrate, Joi, Segments } = require('celebrate');
 const { validElector, voting } = require('../src/controller/elector');
+const { asyncHandler } = require('../src/exception');
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.post('/check', celebrate({
     email: Joi.string().max(64).email().required(),
     elector_id: Joi.string().pattern(/^[A-Z]\d{6}\(\d\)$/).required(),
   }),
-}), validElector);
+}), asyncHandler(validElector));
 
 /* POST 投票 */
 router.post('/vote', celebrate({
@@ -21,6 +22,6 @@ router.post('/vote', celebrate({
     elector_id: Joi.string().pattern(/^[A-Z]\d{6}\(\d\)$/).required(),
     candidate_id: Joi.number().min(1).integer().required(),
   }),
-}), voting);
+}), asyncHandler(voting));
 
 module.exports = router;

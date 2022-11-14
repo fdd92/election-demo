@@ -2,6 +2,7 @@ const console = require('console');
 const adminService = require('../service/admin');
 const electionService = require('../service/election');
 const { eventEmitter } = require('../event');
+const { BussErr } = require('../exception');
 
 // 管理员登录
 const login = async (req, res) => {
@@ -51,7 +52,7 @@ const updateElection = async (req, res) => {
       electionId: election.get('election_id'),
     });
   } else {
-    throw new Error('错误的操作');
+    throw new BussErr('错误的操作');
   }
 
   res.status('200').json({

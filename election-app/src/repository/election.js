@@ -1,6 +1,8 @@
 const { QueryTypes } = require('sequelize');
-const { CandidateMapper } = require('../model/election');
+const { CandidateMapper, ElectionMapper } = require('../model/election');
 const sequelize = require('../db');
+
+const { BussErr } = require('../exception');
 
 // 查看用户是否对某个选举投票过
 const countVote = async (electionId, electorId) => {
@@ -42,6 +44,30 @@ const getVotes = async (lastId, electionId, limit) => {
   return results;
 };
 
+// 获取选举
+async function getElection(electionId, raw = false, tx = null, lock = false) {
+  const options = {};
+  if (raw) {
+    options.raw = true;
+    options.nest = true;
+  }
+
+  if (tx) {
+    options.transaction = tx;
+    if (lock) {
+      // 添加行级锁，防止并发
+      options.lock = true;
+    }
+  }
+
+  const election = await ElectionMapper.findByPk(electionId, options);
+  // 查询选举是否存在
+  if (election == null) {
+    throw new BussErr(`找不到选举 ${electionId}。`);
+  }
+  return election;
+}
+
 module.exports = {
-  countVote, electionHasCandidate, queryVoteDetailByElectionId, getVotes,
+  countVote, electionHasCandidate, queryVoteDetailByElectionId, getVotes, getElection,
 };

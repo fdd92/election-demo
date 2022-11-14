@@ -45,17 +45,18 @@ it('测试', async () => {
     elector_id: 'test',
   });
 
-  await notice.sendElectionResult({
-    electionId,
-  });
+  // todo mock
+  // await notice.sendElectionResult({
+  //  electionId,
+  // });
 
   // 清除数据
-  election.destory();
-  candidate1.destory();
-  candidate2.destory();
-  candidate3.destory();
-  vote1.destory();
-  vote2.destory();
-  vote3.destory();
-  vote4.destory();
+  election.destroy();
+  candidate1.destroy();
+  candidate2.destroy();
+  candidate3.destroy();
+  vote1.destroy();
+  vote2.destroy();
+  vote3.destroy();
+  vote4.destroy();
 });

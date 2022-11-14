@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { AdminMapper } = require('../model/admin');
 const authConfig = require('../../config/auth');
+const { BussErr } = require('../exception');
 
 // 获取 jwt token
 function generateToken(account) {
@@ -17,12 +18,12 @@ const login = async (account, password) => {
   });
 
   if (admin == null) {
-    throw new Error('账号或密码错误。');
+    throw new BussErr('账号或密码错误。');
   }
 
   const validPassword = crypto.createHash('sha256').update(password + admin.salt).digest('hex');
   if (validPassword !== admin.pass) {
-    throw new Error('账号或密码错误。');
+    throw new BussErr('账号或密码错误。');
   }
 
   return generateToken(admin.account);

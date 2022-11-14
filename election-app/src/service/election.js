@@ -1,5 +1,7 @@
 const { ElectionMapper, CandidateMapper, VoteMapper } = require('../model/election');
 const electionRepository = require('../repository/election');
+const sequelize = require('../db');
+const { BussErr } = require('../exception');
 
 // 创建选举
 const create = async () => {
@@ -9,56 +11,43 @@ const create = async () => {
   return election;
 };
 
-// 获取选举
-async function getElection(electionId, raw = false) {
-  const options = {};
-  if (raw) {
-    options.raw = true;
-    options.nest = true;
-  }
-
-  // todo: for update
-  const election = await ElectionMapper.findByPk(electionId, options);
-  // 查询选举是否存在
-  if (election == null) {
-    throw new Error(`找不到选举 ${electionId}。`);
-  }
-  return election;
-}
-
 // 添加候选人
 const addCandidate = async (electionId, candidate) => {
   // 查询选举是否存在
-  const election = await getElection(electionId);
-  if (election.get('stat') !== 1) {
-    throw new Error(`选举 ${electionId} 不是初始化状态`);
-  }
+  const condidateModel = await sequelize.transaction(async (t) => {
+    const election = await electionRepository.getElection(electionId);
+    if (election.get('stat') !== 1) {
+      throw new BussErr(`选举 ${electionId} 不是初始化状态`);
+    }
 
-  // 查询候选人是否存在
-  const countCondidate = await CandidateMapper.count({
-    where: {
+    // 查询候选人是否存在
+    const countCondidate = await CandidateMapper.count({
+      where: {
+        election_id: electionId,
+        name: candidate.name,
+      },
+    });
+
+    if (countCondidate > 0) {
+      throw new BussErr(`选举 ${electionId} 选举人 ${candidate.name} 已存在。`);
+    }
+
+    // 添加候选人
+    const condidateModelT = await CandidateMapper.create({
       election_id: electionId,
       name: candidate.name,
-    },
+    });
+    return condidateModelT;
   });
 
-  if (countCondidate > 0) {
-    throw new Error(`选举 ${electionId} 选举人 ${candidate.name} 已存在。`);
-  }
-
-  // 添加候选人
-  const condidateModel = await CandidateMapper.create({
-    election_id: electionId,
-    name: candidate.name,
-  });
   return condidateModel;
 };
 
 // 结束选举
 const end = async (electionId) => {
-  const election = await getElection(electionId);
+  const election = await electionRepository.getElection(electionId);
   if (election.get('stat') !== 2) {
-    throw new Error(`选举 ${electionId} 不在进行中状态`);
+    throw new BussErr(`选举 ${electionId} 不在进行中状态`);
   }
 
   election.stat = 3;
@@ -67,9 +56,9 @@ const end = async (electionId) => {
 
 // 开始选举
 const start = async (electionId) => {
-  const election = await getElection(electionId);
+  const election = await electionRepository.getElection(electionId);
   if (election.get('stat') !== 1) {
-    throw new Error(`选举 ${electionId} 不是初始化状态。`);
+    throw new BussErr(`选举 ${electionId} 不是初始化状态。`);
   }
 
   // 查询选举人数
@@ -80,7 +69,7 @@ const start = async (electionId) => {
   });
 
   if (count < 2) {
-    throw new Error(`选举 ${electionId} 需要 2 个人以上才能开始。`);
+    throw new BussErr(`选举 ${electionId} 需要 2 个人以上才能开始。`);
   }
 
   election.set('stat', 2);
@@ -91,15 +80,15 @@ const start = async (electionId) => {
 // 校验
 const validElector = async (electionId, electorId) => {
   // 校验选举状态
-  const election = await getElection(electionId);
+  const election = await electionRepository.getElection(electionId);
   if (election.get('stat') !== 2) {
-    throw new Error(`选举 ${election} 不在投票中。`);
+    throw new BussErr(`选举 ${election} 不在投票中。`);
   }
 
   // 判断是否参与过选举
   const count = electionRepository.countVote(electionId, electorId);
   if (count) {
-    throw new Error('您已经参与过这场选举了。');
+    throw new BussErr('您已经参与过这场选举了。');
   }
 };
 
@@ -112,7 +101,7 @@ const voting = async (electionId, electorId, candidateId, email) => {
   const count = await electionRepository.electionHasCandidate(electionId, candidateId);
 
   if (!count) {
-    throw new Error('参选人不在这场选举中。');
+    throw new BussErr('参选人不在这场选举中。');
   }
 
   const vote = await VoteMapper.create({
@@ -125,7 +114,7 @@ const voting = async (electionId, electorId, candidateId, email) => {
 
 // 选举详情
 const queryElectionDetail = async (electionId) => {
-  const election = await getElection(electionId, true);
+  const election = await electionRepository.getElection(electionId, true);
 
   const voteDetail = await electionRepository.queryVoteDetailByElectionId(electionId);
 
