@@ -46,4 +46,16 @@ router.get('/candidates/:candidateId', isAuth, celebrate({
   }),
 }), admin.queryCandidateDetail);
 
+router.get('/test', async (req, res) => {
+  eventEmitter.emit('election-end', {
+    electionId: 151,
+  });
+  res.json({ message: 'success' });
+});
+
+router.get('/test1', async (req, res) => {
+  await client.set('a', 1);
+  res.json({ message: 'success' });
+});
+
 module.exports = router;
