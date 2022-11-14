@@ -104,3 +104,10 @@ describe('开启与结束选举', () => {
     election.destroy();
   });
 });
+
+describe('查询选举详情', () => {
+  it('查询选举详情', async () => {
+    const electionDetail = await electionService.queryElectionDetail(151);
+    console.log(JSON.stringify(electionDetail));
+  });
+});

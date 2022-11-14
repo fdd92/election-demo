@@ -10,7 +10,13 @@ const create = async () => {
 };
 
 // 获取选举
-async function getElection(electionId) {
+async function getElection(electionId, raw = false) {
+  const options = {};
+  if (raw) {
+    options.raw = true;
+    options.nest = true;
+  }
+
   // todo: for update
   const election = await ElectionMapper.findByPk(electionId);
   // 查询选举是否存在
@@ -117,6 +123,36 @@ const voting = async (electionId, electorId, candidateId, email) => {
   return vote;
 };
 
+// 选举详情
+const queryElectionDetail = async (electionId) => {
+  const election = getElection(electionId, true);
+
+  const voteDetail = await electionRepository.queryVoteDetailByElectionId(electionId);
+
+  return {
+    ...election,
+    detail: voteDetail,
+  };
+};
+
+// 选举人详情
+const queryCandidateDetail = async (condidateId, page) => {
+  const pageSize = 10;
+  const offset = (page - 1) * pageSize;
+  const votesResult = await VoteMapper.findAndCountAll({
+    where: {
+      condidate_id: condidateId,
+    },
+    limit: pageSize,
+    offset,
+  });
+  return {
+    votes: votesResult.rows,
+    page,
+    votesCount: votesResult.count,
+  };
+};
+
 module.exports = {
   start,
   create,
@@ -124,4 +160,6 @@ module.exports = {
   addCandidate,
   validElector,
   voting,
+  queryElectionDetail,
+  queryCandidateDetail,
 };

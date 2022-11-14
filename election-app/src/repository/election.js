@@ -23,4 +23,13 @@ const electionHasCandidate = async (electionId, candidateId) => {
   return candidateCount;
 };
 
-module.exports = { countVote, electionHasCandidate };
+// 根据选举 ID 获取投票详情
+const queryVoteDetailByElectionId = async (electionId) => {
+  const results = await sequelize.query('SELECT COUNT(vote_id) AS cnt, candidate_id, `name` FROM candidates LEFT JOIN votes USING(candidate_id) WHERE candidates.`election_id` = ? GROUP BY candidate_id', {
+    replacements: [electionId],
+    type: QueryTypes.SELECT,
+  });
+  return results;
+};
+
+module.exports = { countVote, electionHasCandidate, queryVoteDetailByElectionId };
