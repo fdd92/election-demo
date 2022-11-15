@@ -2,15 +2,19 @@ const notice = require('../../job/notice');
 const { client } = require('../../cache');
 const electionService = require('../../service/election');
 const electionRepository = require('../../repository/election');
-const { sendMail } = require('../../mail');
 
 jest.mock('../../cache');
 jest.mock('../../service/election');
 jest.mock('../../repository/election');
-jest.mock('../../mail');
+
+const mockSendMail = jest.fn();
+mockSendMail.mockReturnValue(Promise.resolve(() => 1));
+jest.mock('../../mail', () => ({
+  sendMail: () => mockSendMail(),
+}));
 
 describe('选举结束，投票结果邮件发送', () => {
-  it('测试结果发放', async () => {
+  it('测试结果成功发放', async () => {
     // mock
     const election = {
       election_id: 1,
@@ -32,10 +36,12 @@ describe('选举结束，投票结果邮件发送', () => {
       { vote_id: 3, elector_email: 'fdd93@qq.com' },
     ];
     electionRepository.getVotes.mockResolvedValue(votes);
-    sendMail.mockResolvedValue();
 
     await expect(notice.sendElectionResult({
       electionId: 1,
     })).resolves.not.toThrow();
+
+    // sendMail 方法需要被调用
+    expect(mockSendMail).toHaveBeenCalled();
   });
 });
