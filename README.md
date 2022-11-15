@@ -1,6 +1,6 @@
 # election-demo
 
-简易选举服务后端 Restful API demo
+简易投票服务后端 Restful API demo
 
 # 功能
 
@@ -18,16 +18,35 @@
    3. 用户选举结束后通过之前登记的邮箱收到选举详细结果
    4. 每个合法用户在每次选举限投票一次
 
-# 运行方式
+# Quick Start
 
-直接在项目目录使用 docker compose 启动
+## 配置文件
+
+可以通过配置环境变量，或者复制 ./election-app/config/.envexample 文件到 ./election-app 目录中，文件名修改成 .env。
+
+.env 配置项不覆盖当前环境变量。
+
+## npm 启动
+
+```bash
+# 生产环境启动
+npm start
+
+# 开发环境
+npm run dev
+
+# 运行单元测试
+npm run test
+```
+
+## docker
+
+可直接在项目目录使用 docker compose 启动
 
 ```bash
 docker-compose up -d
 ```
 
-环境变量在 docker-compose.yml 文件中修改
-
-# 接口文档
+# 接口
 
 [接口文档](./api.md)

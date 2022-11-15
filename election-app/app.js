@@ -10,6 +10,9 @@ const { BussErr } = require('./src/exception');
 const adminRouter = require('./routes/admin');
 const electorRouter = require('./routes/elector');
 
+// 加载 doten 配置
+require('dotenv').config();
+
 const app = express();
 
 app.use(logger('dev'));

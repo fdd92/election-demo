@@ -1,0 +1,20 @@
+# jwt
+JWT_SECRET=8a2da05455775e8987cbfac5a0ca54f3f728e274
+
+# redis
+REDIS_HOST=cache
+REDIS_PORT=6379
+
+# mysql
+MYSQL_DATABASE=election
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=develop
+MYSQL_HOST=db
+MYSQL_PORT=3306
+
+# mail
+MAIL_HOST=smtp.qq.com
+MAIL_PORT=465
+MAIL_USER=fdd92@qq.com
+MAIL_SEND_MAIL=fdd92@qq.com
+MAIL_PASSWORD=xxx
