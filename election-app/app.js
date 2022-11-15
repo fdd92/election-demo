@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const console = require('console');
 const { isCelebrateError } = require('celebrate');
 const { eventEmitter } = require('./src/event');
 const { sendElectionResult } = require('./src/job/notice');
@@ -51,6 +52,10 @@ app.use((err, req, res, next) => {
 });
 
 // 配置事件回调
-eventEmitter.on('election-end', sendElectionResult);
+eventEmitter.on('election-end', async () => {
+  sendElectionResult().catch((e) => {
+    console.error('投票结果邮件发放失败', e);
+  });
+});
 
 module.exports = app;

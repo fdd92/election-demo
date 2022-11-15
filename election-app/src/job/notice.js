@@ -13,16 +13,13 @@ const sendElectionResult = async (eventMsg) => {
   // 校验消息
   const { electionId } = eventMsg;
   if (!electionId) {
-    console.error('消息体错误，收到的消息体：', JSON.stringify(eventMsg));
-    return;
+    throw Error(`消息体错误，收到的消息体：${JSON.stringify(eventMsg)}`);
   }
 
   // 获取结果
   const electionDetail = await electionService.queryElectionDetail(electionId);
-  console.log(JSON.stringify(electionDetail));
   if (electionDetail.stat !== 3) {
-    console.error(`选举 ${electionId} 还未结束`);
-    return;
+    throw Error(`选举 ${electionId} 还未结束`);
   }
 
   // 邮件任务开始执行，保证幂等
@@ -32,8 +29,7 @@ const sendElectionResult = async (eventMsg) => {
     NX: true,
   });
   if (!cacheResult) {
-    console.error(`选举 ${electionId} 消息已经或者正在发送`);
-    return;
+    throw Error(`选举 ${electionId} 消息已经或者正在发送`);
   }
   console.log(`选举 ${electionId} 结果发送任务开始`);
 
@@ -93,10 +89,10 @@ const sendElectionResult = async (eventMsg) => {
     const toEmail = emails.join(';');
     const sendMailPromise = sendMail(`${toEmail};`, '您参与投票的选举结果', html)
       .catch((err) => {
-        console.log('邮件发送失败：', err);
+        throw Error('邮件发送失败：', err);
       });
     sendEmailPromiseList.push(sendMailPromise);
-  } while (emails.length);
+  } while (emails.length === 10);
 
   // 保证邮件发送完毕
   await Promise.all(sendEmailPromiseList);

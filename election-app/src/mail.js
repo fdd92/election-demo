@@ -22,7 +22,7 @@ const sendMail = async (toEmail, subject, html) => {
   console.log(option);
   transporter.sendMail(option, (error, info) => {
     if (error) {
-      console.error(error);
+      throw error;
     } else {
       console.log(info);
     }

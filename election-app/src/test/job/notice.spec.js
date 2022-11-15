@@ -1,62 +1,41 @@
 const notice = require('../../job/notice');
-const { ElectionMapper, CandidateMapper, VoteMapper } = require('../../model/election');
+const { client } = require('../../cache');
+const electionService = require('../../service/election');
+const electionRepository = require('../../repository/election');
+const { sendMail } = require('../../mail');
 
-it('测试', async () => {
-  // 准备数据
-  const election = await ElectionMapper.create({
-    stat: 3,
-  });
-  const electionId = election.get('election_id');
+jest.mock('../../cache');
+jest.mock('../../service/election');
+jest.mock('../../repository/election');
+jest.mock('../../mail');
 
-  const candidate1 = await CandidateMapper.create({
-    election_id: electionId,
-    name: '第一人',
-  });
-  const candidate2 = await CandidateMapper.create({
-    election_id: electionId,
-    name: '第二人',
-  });
-  const candidate3 = await CandidateMapper.create({
-    election_id: electionId,
-    name: '第三人',
-  });
+describe('选举结束，投票结果邮件发送', () => {
+  it('测试结果发放', async () => {
+    // mock
+    const election = {
+      election_id: 1,
+      stat: 3,
+      detail: [
+        { cnt: 1, candidate_id: 1, name: '测试1' },
+        { cnt: 5, candidate_id: 2, name: '测试2' },
+        { cnt: 8, candidate_id: 3, name: '测试3' },
+      ],
+    };
+    electionService.queryElectionDetail.mockResolvedValue(election);
+    client.set.mockResolvedValue(1);
+    client.sAdd.mockResolvedValue(1);
+    client.sPop.mockResolvedValue(['fdd92@qq.com', 'fdd93@qq.com']);
 
-  const vote1 = await VoteMapper.create({
-    candidate_id: candidate1.get('candidate_id'),
-    elector_email: 'fdd93@qq.com',
-    elector_id: 'test',
+    const votes = [
+      { vote_id: 1, elector_email: 'fdd92@qq.com' },
+      { vote_id: 2, elector_email: 'fdd93@qq.com' },
+      { vote_id: 3, elector_email: 'fdd93@qq.com' },
+    ];
+    electionRepository.getVotes.mockResolvedValue(votes);
+    sendMail.mockResolvedValue();
+
+    await expect(notice.sendElectionResult({
+      electionId: 1,
+    })).resolves.not.toThrow();
   });
-
-  const vote2 = await VoteMapper.create({
-    candidate_id: candidate2.get('candidate_id'),
-    elector_email: 'haia25675@gmail.com',
-    elector_id: 'test',
-  });
-
-  const vote3 = await VoteMapper.create({
-    candidate_id: candidate3.get('candidate_id'),
-    elector_email: 'fdd93@qq.com',
-    elector_id: 'test',
-  });
-
-  const vote4 = await VoteMapper.create({
-    candidate_id: candidate3.get('candidate_id'),
-    elector_email: 'fdd92@hotmail.com',
-    elector_id: 'test',
-  });
-
-  // todo mock
-  // await notice.sendElectionResult({
-  //  electionId,
-  // });
-
-  // 清除数据
-  election.destroy();
-  candidate1.destroy();
-  candidate2.destroy();
-  candidate3.destroy();
-  vote1.destroy();
-  vote2.destroy();
-  vote3.destroy();
-  vote4.destroy();
 });
